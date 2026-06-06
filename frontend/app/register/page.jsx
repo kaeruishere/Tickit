@@ -6,7 +6,7 @@ import {
   Box, Card, CardContent, TextField, Button,
   Typography, InputAdornment, IconButton, Divider,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import api, { storeCsrfToken } from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -16,12 +16,16 @@ export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [passwordError, setPasswordError] = useState('');
+
   useEffect(() => {
     document.title = 'Tickit | Kayıt';
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // final check before submit
+    if (passwordError) return;
     setLoading(true);
     try {
       const { data } = await api.post('/auth/register', form);
@@ -29,10 +33,30 @@ export default function RegisterPage() {
       toast.success('Hesap oluşturuldu!');
       router.push('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Kayıt başarısız');
+      const resp = err.response?.data;
+      if (resp?.errors && Array.isArray(resp.errors) && resp.errors.length) {
+        // show first validation error
+        toast.error(resp.errors[0].message);
+      } else {
+        toast.error(resp?.message || 'Kayıt başarısız');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const validatePassword = (pwd) => {
+    if (!pwd || pwd.length < 8) return 'Şifre en az 8 karakter olmalı';
+    if (!/[a-z]/.test(pwd)) return 'Şifre küçük harf içermeli';
+    if (!/[A-Z]/.test(pwd)) return 'Şifre büyük harf içermeli';
+    return '';
+  };
+
+  const pwd = form.password || '';
+  const checks = {
+    length: pwd.length >= 8,
+    lower: /[a-z]/.test(pwd),
+    upper: /[A-Z]/.test(pwd),
   };
 
   return (
@@ -73,9 +97,14 @@ export default function RegisterPage() {
                 type={showPass ? 'text' : 'password'}
                 fullWidth
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) => {
+                  const pwd = e.target.value;
+                  setForm({ ...form, password: pwd });
+                  setPasswordError(validatePassword(pwd));
+                }}
                 required
-                helperText="En az 8 karakter, büyük ve küçük harf içermeli"
+                helperText={passwordError || 'En az 8 karakter, büyük ve küçük harf içermeli'}
+                error={Boolean(passwordError)}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -88,7 +117,29 @@ export default function RegisterPage() {
                   },
                 }}
               />
-              <Button type="submit" variant="contained" size="large" fullWidth disabled={loading} sx={{ mt: 1, py: 1.5 }}>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }} aria-live="polite">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {checks.length ? <CheckCircle color="success" fontSize="small" /> : <RadioButtonUnchecked color="disabled" fontSize="small" />}
+                  <Typography variant="caption" color={checks.length ? 'text.primary' : 'text.secondary'}>En az 8 karakter</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {checks.lower ? <CheckCircle color="success" fontSize="small" /> : <RadioButtonUnchecked color="disabled" fontSize="small" />}
+                  <Typography variant="caption" color={checks.lower ? 'text.primary' : 'text.secondary'}>Küçük harf içeriyor</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {checks.upper ? <CheckCircle color="success" fontSize="small" /> : <RadioButtonUnchecked color="disabled" fontSize="small" />}
+                  <Typography variant="caption" color={checks.upper ? 'text.primary' : 'text.secondary'}>Büyük harf içeriyor</Typography>
+                </Box>
+              </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={loading || Boolean(passwordError)}
+                sx={{ mt: 1, py: 1.5 }}
+              >
                 {loading ? 'Oluşturuluyor...' : 'Kayıt Ol'}
               </Button>
             </Box>
