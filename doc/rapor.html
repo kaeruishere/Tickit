@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tickit Teknik Rapor</title>
+  <style>
+    :root {
+      --ink: #1c1b1f;
+      --muted: #5f5b66;
+      --line: #e6e0e9;
+      --paper: #ffffff;
+      --bg: #fffbfe;
+      --primary: #6750a4;
+      --soft: #f4efff;
+      --ok: #386a20;
+      --warn: #8a5a00;
+      --bad: #b3261e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.65 Arial, Helvetica, sans-serif;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+    }
+
+    header {
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      margin-bottom: 24px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 12px;
+    }
+
+    h1 { font-size: 34px; }
+    h2 {
+      font-size: 24px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      margin-top: 34px;
+    }
+    h3 { font-size: 18px; margin-top: 22px; }
+
+    p { margin: 0 0 12px; }
+
+    a { color: var(--primary); }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 11px;
+      background: var(--soft);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 18px;
+    }
+
+    .note {
+      border-left: 4px solid var(--primary);
+      padding: 12px 14px;
+      background: var(--soft);
+      border-radius: 8px;
+      margin: 14px 0;
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: #fff8e8;
+    }
+
+    .danger {
+      border-left-color: var(--bad);
+      background: #fff4f3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f7f2fa;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    code {
+      background: #f7f2fa;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      background: #17151c;
+      color: #f7f2fa;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0 18px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      border: 0;
+      padding: 0;
+    }
+
+    ul, ol { margin-top: 6px; padding-left: 22px; }
+    li { margin: 4px 0; }
+
+    .status-ok { color: var(--ok); font-weight: 700; }
+    .status-warn { color: var(--warn); font-weight: 700; }
+    .status-bad { color: var(--bad); font-weight: 700; }
+
+    @media (max-width: 760px) {
+      main { padding: 20px 12px 48px; }
+      header, .section { padding: 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Tickit Todo Uygulaması Teknik Raporu</h1>
+    <p>
+      Bu rapor, <strong>Tickit</strong> todo projesinin frontend, backend, veritabanı,
+      güvenlik, API ve çalıştırma yapısını teknik olarak açıklar. Amaç, projeyi hiç
+      bilmeyen bir geliştiricinin kodu okuyabilmesi, yerelde çalıştırabilmesi ve
+      geliştirme yapabilmesidir.
+    </p>
+    <div class="meta">
+      <span class="pill">Frontend: Next.js 16 + React 19</span>
+      <span class="pill">Backend: Express 5</span>
+      <span class="pill">Veritabanı: MongoDB + Mongoose</span>
+      <span class="pill">Auth: JWT Bearer Token</span>
+    </div>
+  </header>
+
+  <section class="section">
+    <h2>1. Proje Özeti</h2>
+    <h3>Projenin amacı</h3>
+    <p>
+      Tickit, kullanıcıların kayıt olup giriş yaptıktan sonra kişisel görevlerini yönetebildiği
+      full-stack bir todo uygulamasıdır. Kullanıcı görev ekleyebilir, düzenleyebilir,
+      silebilir, tamamlandı olarak işaretleyebilir ve görevleri aktif/tamamlanan durumuna göre
+      filtreleyebilir.
+    </p>
+
+    <h3>Kullanılan teknolojiler</h3>
+    <table>
+      <thead>
+        <tr><th>Katman</th><th>Teknoloji</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Frontend</td><td>Next.js 16.2.7, React 19.2.4</td><td>App Router yapısı, client component sayfalar, Turbopack build.</td></tr>
+        <tr><td>UI</td><td>MUI 9, Emotion, MUI Icons</td><td>Formlar, kartlar, modal, toolbar, button ve tema yönetimi.</td></tr>
+        <tr><td>HTTP</td><td>Axios</td><td>API istemcisi ve JWT header interceptor.</td></tr>
+        <tr><td>Bildirim</td><td>react-hot-toast</td><td>Başarı/hata toast mesajları.</td></tr>
+        <tr><td>Backend</td><td>Node.js, Express 5</td><td>REST API, middleware, route ve controller yapısı.</td></tr>
+        <tr><td>Veritabanı</td><td>MongoDB Atlas, Mongoose 9</td><td>User ve Task modelleri.</td></tr>
+        <tr><td>Security</td><td>Helmet, CORS, express-rate-limit, bcryptjs, jsonwebtoken</td><td>HTTP header güvenliği, origin kontrolü, rate limit, şifre hashleme ve JWT.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Frontend, backend, veritabanı ve deployment yapısı</h3>
+    <ul>
+      <li><strong>Frontend:</strong> <code>frontend/</code> klasöründe Next.js uygulaması yer alır. Varsayılan geliştirme portu <code>3000</code>.</li>
+      <li><strong>Backend:</strong> <code>backend/</code> klasöründe Express API yer alır. Varsayılan port <code>5000</code>.</li>
+      <li><strong>Veritabanı:</strong> MongoDB bağlantısı <code>backend/src/config/db.js</code> dosyasında <code>MONGODB_URI</code> ile yapılır.</li>
+      <li><strong>Deployment:</strong> Projede deployment konfigürasyonu yoktur. Frontend Vercel/Node host üzerinde, backend Render/Railway/Fly.io/VPS gibi Node çalıştırabilen ortamda yayınlanabilir.</li>
+    </ul>
+
+    <h3>Proje nasıl çalıştırılır?</h3>
+    <pre><code># Backend
+cd backend
+npm install
+npm run dev
+
+# Frontend
+cd frontend
+npm install
+npm run dev</code></pre>
+    <p>
+      Frontend API adresini <code>frontend/.env.local</code> içindeki
+      <code>NEXT_PUBLIC_API_URL</code> ile okur. Backend MongoDB ve JWT ayarlarını
+      <code>backend/.env</code> içinden okur.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>2. Proje Dizin Yapısı</h2>
+    <h3>Ana klasörler ve dosyalar</h3>
+    <table>
+      <thead>
+        <tr><th>Yol</th><th>Görev</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>backend/</code></td><td>Express API, MongoDB modelleri, route/controller/middleware dosyaları.</td></tr>
+        <tr><td><code>backend/src/app.js</code></td><td>Express app kurulumu, Helmet, CORS, JSON parser, rate limiter, route mount ve error middleware.</td></tr>
+        <tr><td><code>backend/src/server.js</code></td><td><code>dotenv</code> yükleme, MongoDB bağlantısı ve HTTP server başlatma.</td></tr>
+        <tr><td><code>backend/src/config/db.js</code></td><td>Mongoose ile MongoDB bağlantısını yapan dosya.</td></tr>
+        <tr><td><code>backend/src/models/User.js</code></td><td>Kullanıcı şeması, unique username/email, password hash hook ve password karşılaştırma metodu.</td></tr>
+        <tr><td><code>backend/src/models/Task.js</code></td><td>Görev şeması: başlık, açıklama, tamamlanma, öncelik, renk, tarih/saat ve kullanıcı ilişkisi.</td></tr>
+        <tr><td><code>backend/src/controllers/</code></td><td>Auth ve task business logic işlemleri.</td></tr>
+        <tr><td><code>backend/src/routes/</code></td><td>REST endpoint tanımları.</td></tr>
+        <tr><td><code>backend/src/middleware/</code></td><td>JWT koruma middleware'i ve merkezi hata yakalama.</td></tr>
+        <tr><td><code>frontend/</code></td><td>Next.js frontend uygulaması.</td></tr>
+        <tr><td><code>frontend/app/layout.js</code></td><td>Root layout, MUI ThemeProvider, CSS baseline, toast provider, favicon linkleri ve varsayılan title.</td></tr>
+        <tr><td><code>frontend/app/page.js</code></td><td>Kök route'u <code>/login</code> sayfasına yönlendirir.</td></tr>
+        <tr><td><code>frontend/app/login/page.jsx</code></td><td>Giriş ekranı.</td></tr>
+        <tr><td><code>frontend/app/register/page.jsx</code></td><td>Kayıt ekranı.</td></tr>
+        <tr><td><code>frontend/app/dashboard/page.jsx</code></td><td>Yetkili dashboard, görev listesi ve görev modalları.</td></tr>
+        <tr><td><code>frontend/components/tasks/</code></td><td>TaskForm, TaskList ve TaskCard componentleri.</td></tr>
+        <tr><td><code>frontend/lib/api.js</code></td><td>Axios instance, JWT header ekleme ve 401 durumunda localStorage temizleme.</td></tr>
+        <tr><td><code>frontend/lib/auth.js</code></td><td>Token/user localStorage yardımcıları.</td></tr>
+        <tr><td><code>frontend/lib/theme/theme.js</code></td><td>MUI tema renkleri ve component override ayarları.</td></tr>
+        <tr><td><code>frontend/public/favicon_io/</code></td><td>Tickit logo, favicon, apple icon ve webmanifest dosyaları.</td></tr>
+        <tr><td><code>doc/rapor.html</code></td><td>Bu teknik rapor dosyası.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Environment dosyaları ve .env.example açıklaması</h3>
+    <table>
+      <thead>
+        <tr><th>Dosya</th><th>Amaç</th><th>Not</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>backend/.env</code></td><td>Backend çalışma zamanı secret ve bağlantı bilgileri.</td><td>Gerçek değerler rapora yazılmamalı ve Git'e commit edilmemeli.</td></tr>
+        <tr><td><code>backend/.env.example</code></td><td>Backend için örnek env şablonu olmalıdır.</td><td>Mevcut dosya boş görünüyor; önerilen örnek aşağıdadır.</td></tr>
+        <tr><td><code>frontend/.env.local</code></td><td>Frontend'in kullanacağı public API URL.</td><td><code>NEXT_PUBLIC_</code> ile başladığı için browser bundle içinde görülebilir.</td></tr>
+      </tbody>
+    </table>
+    <pre><code># backend/.env.example önerisi
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=mongodb+srv://USER:PASSWORD@HOST/tickit?appName=APP_NAME
+JWT_SECRET=change-me-with-a-long-random-secret
+JWT_EXPIRE=7d
+CLIENT_URL=http://localhost:3000
+
+# frontend/.env.local.example önerisi
+NEXT_PUBLIC_API_URL=http://localhost:5000/api</code></pre>
+  </section>
+
+  <section class="section">
+    <h2>3. Sayfa ve Ekran Raporu</h2>
+    <h3>Sayfa / route listesi</h3>
+    <table>
+      <thead>
+        <tr><th>Route</th><th>Dosya</th><th>Amaç</th><th>Auth</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>/</code></td><td><code>frontend/app/page.js</code></td><td>Kök route'u <code>/login</code>'e yönlendirir.</td><td>Gerekmez</td></tr>
+        <tr><td><code>/login</code></td><td><code>frontend/app/login/page.jsx</code></td><td>Kullanıcı girişi.</td><td>Gerekmez</td></tr>
+        <tr><td><code>/register</code></td><td><code>frontend/app/register/page.jsx</code></td><td>Yeni kullanıcı kaydı.</td><td>Gerekmez</td></tr>
+        <tr><td><code>/dashboard</code></td><td><code>frontend/app/dashboard/page.jsx</code></td><td>Görev yönetimi ekranı.</td><td>Frontend kontrolü + API JWT gerekir</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Login sayfası</h3>
+    <ul>
+      <li><strong>Amaç:</strong> Kullanıcının email ve şifre ile giriş yapması.</li>
+      <li><strong>Componentler:</strong> MUI <code>TextField</code>, <code>Button</code>, <code>Card</code>, şifre görünürlük <code>IconButton</code>, Tickit logo.</li>
+      <li><strong>Form alanları:</strong> <code>email</code> ve <code>password</code>. İkisi de HTML <code>required</code>.</li>
+      <li><strong>Butonlar:</strong> Giriş yap, şifre göster/gizle, kayıt sayfasına link.</li>
+      <li><strong>Akış:</strong> <code>POST /api/auth/login</code> çağrılır, token ve user localStorage'a yazılır, kullanıcı <code>/dashboard</code>'a yönlendirilir.</li>
+      <li><strong>Hata:</strong> API hata mesajı varsa toast ile gösterilir, yoksa <code>Giriş başarısız</code>.</li>
+    </ul>
+
+    <h3>Register sayfası</h3>
+    <ul>
+      <li><strong>Amaç:</strong> Yeni kullanıcı hesabı oluşturmak.</li>
+      <li><strong>Form alanları:</strong> <code>username</code>, <code>email</code>, <code>password</code>. Hepsi <code>required</code>; şifre için helper text <code>En az 6 karakter</code>.</li>
+      <li><strong>Butonlar:</strong> Kayıt ol, şifre göster/gizle, login sayfasına link.</li>
+      <li><strong>Akış:</strong> <code>POST /api/auth/register</code> çağrılır, token ve user localStorage'a yazılır, dashboard'a yönlendirilir.</li>
+    </ul>
+
+    <h3>Dashboard sayfası</h3>
+    <ul>
+      <li><strong>Amaç:</strong> Görevleri listelemek ve yönetmek.</li>
+      <li><strong>Kullanılan componentler:</strong> <code>TaskList</code>, <code>TaskCard</code>, <code>TaskForm</code>, MUI AppBar, Dialog, ToggleButtonGroup, Menu, Avatar.</li>
+      <li><strong>Karşılama alanı:</strong> Kullanıcı adına göre greeting, aktif görev bilgisi ve güncel tarih gösterilir.</li>
+      <li><strong>İstatistikler:</strong> Toplam, aktif ve tamamlanan görev sayıları hesaplanır.</li>
+      <li><strong>Filtreler:</strong> <code>Tümü</code>, <code>Aktif</code>, <code>Tamamlanan</code>.</li>
+      <li><strong>Görev Ekle:</strong> Modal açar, <code>TaskForm</code> boş initial data ile kullanılır.</li>
+      <li><strong>Görev Düzenle:</strong> Karttaki düzenle butonu modal açar, <code>TaskForm</code> mevcut görev bilgileriyle doldurulur.</li>
+      <li><strong>Çıkış:</strong> Token ve user localStorage'dan silinir, kullanıcı login'e gider.</li>
+    </ul>
+
+    <h3>Görev formu alanları</h3>
+    <table>
+      <thead>
+        <tr><th>Alan</th><th>Tip</th><th>Zorunlu</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Görev</td><td>TextField</td><td>Evet</td><td>Task title. Boşsa submit yapılmaz.</td></tr>
+        <tr><td>Açıklama</td><td>Collapse + multiline TextField</td><td>Hayır</td><td>Açıklama butonu ile açılır/kapanır.</td></tr>
+        <tr><td>Tarih/Saat</td><td>Date input + saat/dakika select</td><td>Hayır</td><td>Tarih girilirse <code>dueAt</code> ISO tarihine çevrilir. Saat yoksa <code>09:00</code> varsayılır.</td></tr>
+        <tr><td>Renk</td><td>ToggleButtonGroup swatch</td><td>Hayır</td><td>Görev kartında sol renk çizgisi olur.</td></tr>
+        <tr><td>Önem</td><td>Select</td><td>Hayır</td><td><code>low</code>, <code>medium</code>, <code>high</code>. Varsayılan <code>medium</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Kullanıcı akışı</h3>
+    <ol>
+      <li>Kullanıcı <code>/register</code> ile hesap açar veya <code>/login</code> ile giriş yapar.</li>
+      <li>Başarılı auth sonrası JWT ve user localStorage'a kaydedilir.</li>
+      <li>Dashboard açılırken <code>GET /api/tasks</code> ile kullanıcının görevleri alınır.</li>
+      <li>Kullanıcı hızlı görev oluşturabilir veya açıklama/tarih/saat/renk/önem detaylarını açabilir.</li>
+      <li>Görevler tamamlanabilir, düzenlenebilir, silinebilir ve filtrelenebilir.</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>4. Backend/API Raporu</h2>
+    <h3>API endpoint listesi</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Controller</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GET</td><td><code>/api/health</code></td><td>Hayır</td><td><code>app.js</code></td><td>API sağlık kontrolü.</td></tr>
+        <tr><td>POST</td><td><code>/api/auth/register</code></td><td>Hayır</td><td><code>authController.register</code></td><td>Kullanıcı oluşturur ve JWT döner.</td></tr>
+        <tr><td>POST</td><td><code>/api/auth/login</code></td><td>Hayır</td><td><code>authController.login</code></td><td>Email/şifre doğrular ve JWT döner.</td></tr>
+        <tr><td>GET</td><td><code>/api/auth/me</code></td><td>Evet</td><td><code>authController.getMe</code></td><td>Token sahibi kullanıcıyı döner.</td></tr>
+        <tr><td>GET</td><td><code>/api/tasks</code></td><td>Evet</td><td><code>taskController.getTasks</code></td><td>Kullanıcının görevlerini listeler.</td></tr>
+        <tr><td>POST</td><td><code>/api/tasks</code></td><td>Evet</td><td><code>taskController.createTask</code></td><td>Yeni görev oluşturur.</td></tr>
+        <tr><td>PUT</td><td><code>/api/tasks/:id</code></td><td>Evet</td><td><code>taskController.updateTask</code></td><td>Kullanıcıya ait görevi günceller.</td></tr>
+        <tr><td>DELETE</td><td><code>/api/tasks/:id</code></td><td>Evet</td><td><code>taskController.deleteTask</code></td><td>Kullanıcıya ait görevi siler.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Auth request/response örnekleri</h3>
+    <pre><code>POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "kaeru",
+  "email": "kaeru@example.com",
+  "password": "secret123"
+}</code></pre>
+    <pre><code>201 Created
+{
+  "success": true,
+  "token": "JWT_TOKEN",
+  "user": {
+    "id": "USER_ID",
+    "username": "kaeru",
+    "email": "kaeru@example.com"
+  }
+}</code></pre>
+    <pre><code>POST /api/auth/login
+{
+  "email": "kaeru@example.com",
+  "password": "secret123"
+}</code></pre>
+    <pre><code>200 OK
+{
+  "success": true,
+  "token": "JWT_TOKEN",
+  "user": {
+    "id": "USER_ID",
+    "username": "kaeru",
+    "email": "kaeru@example.com"
+  }
+}</code></pre>
+
+    <h3>Task request/response örnekleri</h3>
+    <pre><code>POST /api/tasks
+Authorization: Bearer JWT_TOKEN
+Content-Type: application/json
+
+{
+  "title": "Teknik raporu tamamla",
+  "description": "doc/rapor.html dosyasını güncelle",
+  "priority": "high",
+  "color": "#6750A4",
+  "dueAt": "2026-06-06T09:00:00.000Z"
+}</code></pre>
+    <pre><code>201 Created
+{
+  "success": true,
+  "task": {
+    "_id": "TASK_ID",
+    "user": "USER_ID",
+    "title": "Teknik raporu tamamla",
+    "description": "doc/rapor.html dosyasını güncelle",
+    "completed": false,
+    "priority": "high",
+    "color": "#6750A4",
+    "dueAt": "2026-06-06T09:00:00.000Z",
+    "createdAt": "2026-06-06T08:00:00.000Z",
+    "updatedAt": "2026-06-06T08:00:00.000Z"
+  }
+}</code></pre>
+    <pre><code>GET /api/tasks
+Authorization: Bearer JWT_TOKEN</code></pre>
+    <pre><code>200 OK
+{
+  "success": true,
+  "count": 1,
+  "tasks": [
+    {
+      "_id": "TASK_ID",
+      "user": "USER_ID",
+      "title": "Teknik raporu tamamla",
+      "completed": false,
+      "priority": "high"
+    }
+  ]
+}</code></pre>
+
+    <h3>Hata cevapları</h3>
+    <table>
+      <thead>
+        <tr><th>Durum</th><th>Örnek cevap</th><th>Kaynak</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>400 duplicate user</td><td><code>{"success":false,"message":"Bu email veya kullanıcı adı zaten kullanılıyor"}</code></td><td><code>authController.register</code></td></tr>
+        <tr><td>400 missing login fields</td><td><code>{"success":false,"message":"Email ve şifre gerekli"}</code></td><td><code>authController.login</code></td></tr>
+        <tr><td>401 invalid credentials</td><td><code>{"success":false,"message":"Geçersiz kimlik bilgileri"}</code></td><td><code>authController.login</code></td></tr>
+        <tr><td>401 no token</td><td><code>{"success":false,"message":"Yetkisiz erişim"}</code></td><td><code>middleware/auth.js</code></td></tr>
+        <tr><td>401 invalid token</td><td><code>{"success":false,"message":"Geçersiz token"}</code></td><td><code>middleware/auth.js</code></td></tr>
+        <tr><td>404 task not found</td><td><code>{"success":false,"message":"Görev bulunamadı"}</code></td><td><code>taskController.updateTask/deleteTask</code></td></tr>
+        <tr><td>429 rate limit</td><td><code>Çok fazla istek, 15 dakika sonra deneyin</code></td><td><code>express-rate-limit</code></td></tr>
+        <tr><td>500 server error</td><td><code>{"success":false,"message":"Sunucu hatası"}</code></td><td><code>errorHandler</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Middleware yapısı</h3>
+    <ul>
+      <li><code>helmet()</code>: HTTP güvenlik header'ları ekler.</li>
+      <li><code>cors()</code>: <code>CLIENT_URL</code> veya <code>http://localhost:3000</code> origin'ine izin verir.</li>
+      <li><code>express.json()</code>: JSON body parsing.</li>
+      <li><code>rateLimit()</code>: <code>/api</code> altında 15 dakikada 100 istek sınırı.</li>
+      <li><code>protect</code>: JWT doğrular ve <code>req.user</code> set eder.</li>
+      <li><code>errorHandler</code>: Merkezi hata JSON cevabı üretir.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>5. Veritabanı Raporu</h2>
+    <h3>Kullanılan veritabanı türü</h3>
+    <p>
+      Proje MongoDB kullanır. ODM katmanı Mongoose'tur. MongoDB'de SQL'deki table karşılığı
+      collection'dır. Mongoose model adlarını çoğullaştırarak collection üretir:
+      <code>User</code> modeli <code>users</code>, <code>Task</code> modeli <code>tasks</code>.
+    </p>
+
+    <h3>Collection/table yapısı</h3>
+    <table>
+      <thead>
+        <tr><th>Collection</th><th>Model</th><th>Amaç</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>users</code></td><td><code>User</code></td><td>Kullanıcı hesapları.</td></tr>
+        <tr><td><code>tasks</code></td><td><code>Task</code></td><td>Kullanıcılara ait görevler.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Veritabanı şeması</h3>
+    <table>
+      <thead>
+        <tr><th>Collection</th><th>Alan</th><th>Tip</th><th>Zorunlu</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>users</td><td><code>username</code></td><td>String</td><td>Evet</td><td>Unique, trim uygulanır.</td></tr>
+        <tr><td>users</td><td><code>email</code></td><td>String</td><td>Evet</td><td>Unique, lowercase uygulanır.</td></tr>
+        <tr><td>users</td><td><code>password</code></td><td>String</td><td>Evet</td><td>Minimum 6 karakter, save öncesi bcrypt hashlenir.</td></tr>
+        <tr><td>users</td><td><code>createdAt</code>, <code>updatedAt</code></td><td>Date</td><td>Otomatik</td><td>Mongoose timestamps.</td></tr>
+        <tr><td>tasks</td><td><code>user</code></td><td>ObjectId ref User</td><td>Evet</td><td>Görevin sahibi.</td></tr>
+        <tr><td>tasks</td><td><code>title</code></td><td>String</td><td>Evet</td><td>Görev başlığı, trim uygulanır.</td></tr>
+        <tr><td>tasks</td><td><code>description</code></td><td>String</td><td>Hayır</td><td>Varsayılan boş string.</td></tr>
+        <tr><td>tasks</td><td><code>completed</code></td><td>Boolean</td><td>Hayır</td><td>Varsayılan <code>false</code>.</td></tr>
+        <tr><td>tasks</td><td><code>priority</code></td><td>String enum</td><td>Hayır</td><td><code>low</code>, <code>medium</code>, <code>high</code>. Varsayılan <code>medium</code>.</td></tr>
+        <tr><td>tasks</td><td><code>color</code></td><td>String</td><td>Hayır</td><td>Görev kartı vurgu rengi. Varsayılan <code>#6750A4</code>.</td></tr>
+        <tr><td>tasks</td><td><code>dueAt</code></td><td>Date/null</td><td>Hayır</td><td>Görev tarih/saat bilgisi. Varsayılan <code>null</code>.</td></tr>
+        <tr><td>tasks</td><td><code>createdAt</code>, <code>updatedAt</code></td><td>Date</td><td>Otomatik</td><td>Mongoose timestamps.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>İlişkiler ve indexler</h3>
+    <ul>
+      <li><code>tasks.user</code>, <code>users._id</code> alanına referans verir.</li>
+      <li>Task sorguları her zaman <code>{ user: req.user._id }</code> filtresiyle yapılır; kullanıcı sadece kendi görevlerini görür.</li>
+      <li><code>username</code> ve <code>email</code> alanlarında Mongoose unique tanımı vardır; MongoDB unique index oluşturur.</li>
+      <li>Task için manuel index tanımı yoktur. Performans için <code>{ user: 1, createdAt: -1 }</code> index'i önerilir.</li>
+    </ul>
+
+    <h3>Örnek kayıt yapısı</h3>
+    <pre><code>{
+  "_id": "665f11111111111111111111",
+  "username": "kaeru",
+  "email": "kaeru@example.com",
+  "password": "$2b$12$HASH_VALUE",
+  "createdAt": "2026-06-06T08:00:00.000Z",
+  "updatedAt": "2026-06-06T08:00:00.000Z"
+}</code></pre>
+    <pre><code>{
+  "_id": "665f22222222222222222222",
+  "user": "665f11111111111111111111",
+  "title": "Fatura öde",
+  "description": "Elektrik faturasını kontrol et",
+  "completed": false,
+  "priority": "medium",
+  "color": "#386A20",
+  "dueAt": "2026-06-06T12:30:00.000Z",
+  "createdAt": "2026-06-06T08:10:00.000Z",
+  "updatedAt": "2026-06-06T08:10:00.000Z"
+}</code></pre>
+
+    <h3>Veritabanı bağlantı dosyası ve konumu</h3>
+    <p>
+      Bağlantı <code>backend/src/config/db.js</code> dosyasında yapılır:
+      <code>mongoose.connect(process.env.MONGODB_URI)</code>. Eğer URI içinde database adı verilmezse
+      MongoDB varsayılan olarak <code>test</code> database'ini kullanabilir. Önerilen format:
+    </p>
+    <pre><code>MONGODB_URI=mongodb+srv://USER:PASSWORD@HOST/tickit?appName=APP_NAME</code></pre>
+  </section>
+
+  <section class="section">
+    <h2>6. Security Ayarları</h2>
+    <h3>Authentication ve authorization</h3>
+    <ul>
+      <li>Kullanıcı kayıt/giriş sonrası JWT alır.</li>
+      <li>Frontend token'ı <code>localStorage.token</code> olarak saklar.</li>
+      <li>Axios interceptor her isteğe <code>Authorization: Bearer TOKEN</code> header'ı ekler.</li>
+      <li><code>protect</code> middleware JWT'yi doğrular, kullanıcıyı bulur ve <code>req.user</code> olarak request'e ekler.</li>
+      <li>Task route'larında <code>router.use(protect)</code> vardır; tüm task endpointleri auth ister.</li>
+      <li>Task update/delete/find işlemlerinde <code>_id</code> ile beraber <code>user: req.user._id</code> filtresi kullanılır. Bu authorization kontrolüdür.</li>
+    </ul>
+
+    <h3>Şifre hashleme</h3>
+    <p>
+      <code>UserSchema.pre('save')</code> hook'u password alanı değişmişse <code>bcrypt.hash(password, 12)</code>
+      ile hash üretir. Login sırasında <code>bcrypt.compare</code> ile girilen şifre hash ile karşılaştırılır.
+    </p>
+
+    <h3>JWT/session/cookie kullanımı</h3>
+    <p>
+      Proje session veya cookie tabanlı auth kullanmaz. JWT response body ile frontend'e döner ve localStorage'da tutulur.
+      Backend <code>protect</code> middleware içinde cookie token kontrolü için kod barındırır; ancak app içinde cookie parser middleware'i yoktur ve frontend cookie yazmaz.
+    </p>
+
+    <h3>CORS ve rate limiting</h3>
+    <ul>
+      <li><code>cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true })</code> kullanılır.</li>
+      <li><code>/api</code> altında 15 dakika için maksimum 100 istek sınırı vardır.</li>
+      <li><code>helmet()</code> temel HTTP header güvenliği sağlar.</li>
+    </ul>
+
+    <h3>Input validation/sanitization</h3>
+    <p>
+      Mevcut validasyonun önemli kısmı Mongoose schema seviyesindedir: required, minlength, enum, unique.
+      Frontend tarafında HTML <code>required</code> ve basit boş title kontrolü vardır. Ayrı bir validation library
+      veya request sanitizer kullanılmamaktadır.
+    </p>
+
+    <h3>XSS, CSRF, SQL/NoSQL injection önlemleri</h3>
+    <ul>
+      <li><strong>XSS:</strong> React metinleri escape ettiği için temel output XSS riski düşüktür. Ancak localStorage token XSS durumunda çalınabilir.</li>
+      <li><strong>CSRF:</strong> Token localStorage + Authorization header ile gönderildiği için klasik cookie tabanlı CSRF riski daha düşüktür. Cookie auth'a geçilirse CSRF token gerekir.</li>
+      <li><strong>SQL injection:</strong> SQL kullanılmadığı için klasik SQL injection yoktur.</li>
+      <li><strong>NoSQL injection:</strong> Request body doğrudan create/update'e yayılır. Mongo sanitize middleware'i yoktur; production için <code>express-mongo-sanitize</code> önerilir.</li>
+    </ul>
+
+    <h3>Environment variable kullanımı ve hassas bilgiler</h3>
+    <table>
+      <thead>
+        <tr><th>Değişken</th><th>Katman</th><th>Hassas mı?</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>MONGODB_URI</code></td><td>Backend</td><td>Evet</td><td>MongoDB kullanıcı adı/şifre ve database adresi içerir.</td></tr>
+        <tr><td><code>JWT_SECRET</code></td><td>Backend</td><td>Evet</td><td>JWT imzalama secret'ı.</td></tr>
+        <tr><td><code>JWT_EXPIRE</code></td><td>Backend</td><td>Hayır</td><td>JWT süresi. Örn. <code>7d</code>.</td></tr>
+        <tr><td><code>PORT</code></td><td>Backend</td><td>Hayır</td><td>API portu.</td></tr>
+        <tr><td><code>CLIENT_URL</code></td><td>Backend</td><td>Hayır</td><td>CORS için frontend origin.</td></tr>
+        <tr><td><code>NODE_ENV</code></td><td>Backend</td><td>Hayır</td><td>Development durumunda error stack response'a eklenir.</td></tr>
+        <tr><td><code>NEXT_PUBLIC_API_URL</code></td><td>Frontend</td><td>Hayır</td><td>Browser'a açık API base URL.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Güvenlik kontrol listesi</h3>
+    <table>
+      <thead>
+        <tr><th>Kontrol</th><th>Durum</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>JWT auth</td><td class="status-ok">Var</td><td>Bearer token ile korunmuş task endpointleri.</td></tr>
+        <tr><td>Password hashing</td><td class="status-ok">Var</td><td>bcryptjs, 12 salt round.</td></tr>
+        <tr><td>Authorization ownership check</td><td class="status-ok">Var</td><td>Task update/delete işlemlerinde user filtresi.</td></tr>
+        <tr><td>Helmet</td><td class="status-ok">Var</td><td>HTTP security headers.</td></tr>
+        <tr><td>CORS</td><td class="status-ok">Var</td><td>CLIENT_URL tabanlı origin.</td></tr>
+        <tr><td>Rate limiting</td><td class="status-ok">Var</td><td>15 dakikada 100 istek.</td></tr>
+        <tr><td>Schema validation</td><td class="status-ok">Kısmi</td><td>Mongoose schema validasyonları var.</td></tr>
+        <tr><td>Request body validation library</td><td class="status-warn">Yok</td><td>Joi/Zod/express-validator önerilir.</td></tr>
+        <tr><td>NoSQL sanitize</td><td class="status-warn">Yok</td><td><code>express-mongo-sanitize</code> önerilir.</td></tr>
+        <tr><td>HttpOnly cookie auth</td><td class="status-warn">Yok</td><td>Token localStorage'da. XSS etkisini azaltmak için HttpOnly cookie değerlendirilebilir.</td></tr>
+        <tr><td>Refresh token</td><td class="status-warn">Yok</td><td>Tek access token kullanımı var.</td></tr>
+        <tr><td>Test coverage</td><td class="status-bad">Yok</td><td>Backend test script'i placeholder.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Production için önerilen güvenlik iyileştirmeleri</h3>
+    <ul>
+      <li>JWT secret değerini uzun, random ve environment'a özel tutmak.</li>
+      <li>Token'ı localStorage yerine HttpOnly, Secure, SameSite cookie ile yönetmeyi değerlendirmek.</li>
+      <li>CSRF koruması eklemek, özellikle cookie auth'a geçilirse.</li>
+      <li>Request validation için Zod/Joi/express-validator eklemek.</li>
+      <li>NoSQL injection riskini azaltmak için request sanitizer kullanmak.</li>
+      <li>Rate limit'i endpoint tipine göre özelleştirmek; auth endpointleri için daha sıkı limit uygulamak.</li>
+      <li>Production'da error stack sızdırmamak, güvenli log altyapısı kurmak.</li>
+      <li>MongoDB Atlas IP allowlist ve minimum yetkili DB user kullanmak.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>7. Todo Özellikleri</h2>
+    <table>
+      <thead>
+        <tr><th>Özellik</th><th>Frontend dosyaları</th><th>Backend dosyaları</th><th>Açıklama</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Görev ekleme</td><td><code>dashboard/page.jsx</code>, <code>TaskForm.jsx</code></td><td><code>taskController.createTask</code>, <code>Task.js</code></td><td>Modal açılır, title zorunlu, detay alanları opsiyonel.</td></tr>
+        <tr><td>Görev düzenleme</td><td><code>TaskCard.jsx</code>, <code>dashboard/page.jsx</code>, <code>TaskForm.jsx</code></td><td><code>taskController.updateTask</code></td><td>Edit icon ile modal açılır, mevcut veri initialData olarak forma verilir.</td></tr>
+        <tr><td>Görev silme</td><td><code>TaskCard.jsx</code>, <code>dashboard/page.jsx</code></td><td><code>taskController.deleteTask</code></td><td>Sil butonu DELETE çağrısı yapar, state'ten çıkarılır.</td></tr>
+        <tr><td>Görev tamamlama</td><td><code>TaskCard.jsx</code>, <code>dashboard/page.jsx</code></td><td><code>taskController.updateTask</code></td><td>Checkbox completed değerini tersine çevirir.</td></tr>
+        <tr><td>Öncelik</td><td><code>TaskForm.jsx</code>, <code>TaskCard.jsx</code></td><td><code>Task.js</code></td><td>Düşük/Orta/Yüksek enum. Kartta Flag chip olarak görünür.</td></tr>
+        <tr><td>Tarih ve saat</td><td><code>TaskForm.jsx</code>, <code>TaskCard.jsx</code></td><td><code>Task.js</code></td><td>Tarih + saat/dakika seçimi <code>dueAt</code> alanına kaydedilir. Kartta Event chip görünür.</td></tr>
+        <tr><td>Renk</td><td><code>TaskForm.jsx</code>, <code>TaskCard.jsx</code></td><td><code>Task.js</code></td><td>Swatch seçimi <code>color</code> alanına kaydedilir; kart sol çizgisinde kullanılır.</td></tr>
+        <tr><td>Filtreleme</td><td><code>dashboard/page.jsx</code></td><td>Yok</td><td>Client-side <code>all/active/completed</code> filtresi.</td></tr>
+        <tr><td>Kategori</td><td>Yok</td><td>Yok</td><td>Projede kategori alanı bulunmuyor; renk görsel gruplayıcı olarak kullanılabilir.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>8. State Management ve Frontend Mimarisi</h2>
+    <h3>Component yapısı</h3>
+    <ul>
+      <li><code>DashboardPage</code>: Görev state'i, filtre state'i, modal state'i, user state'i ve API CRUD işlemlerinin ana sahibi.</li>
+      <li><code>TaskForm</code>: Controlled form state'i, açılır detay bölümleri ve submit payload üretimi.</li>
+      <li><code>TaskList</code>: Boş liste mesajı veya task kartlarını render eder.</li>
+      <li><code>TaskCard</code>: Tek görev görünümü, checkbox, edit/delete aksiyonları, priority/date chipleri ve renk vurgusu.</li>
+      <li><code>api.js</code>: Merkezi Axios yapılandırması.</li>
+      <li><code>auth.js</code>: localStorage token/user yardımcıları.</li>
+    </ul>
+
+    <h3>Hook kullanımı</h3>
+    <ul>
+      <li><code>useState</code>: Form alanları, loading, modal, filtre, user ve tasks state'leri.</li>
+      <li><code>useEffect</code>: Sayfa title ayarı, dashboard başlangıç auth kontrolü ve görev yükleme.</li>
+      <li><code>useRouter</code>: Login/register/dashboard yönlendirmeleri.</li>
+      <li><code>useMemo</code>: TaskForm içinde initial due date/time formatlama.</li>
+    </ul>
+
+    <h3>Form yönetimi</h3>
+    <p>
+      Formlar controlled component yaklaşımıyla yönetilir. Login/register formunda tek state objesi vardır.
+      TaskForm daha kapsamlıdır: <code>form</code> state'i task payload alanlarını, <code>openSections</code>
+      state'i açıklama/tarih/renk/önem panellerini tutar.
+    </p>
+
+    <h3>API istekleri</h3>
+    <p>
+      Tüm frontend API çağrıları <code>frontend/lib/api.js</code> içindeki Axios instance üzerinden yapılır.
+      Base URL <code>NEXT_PUBLIC_API_URL</code> ile ayarlanır; yoksa <code>http://localhost:5000/api</code>
+      kullanılır. Request interceptor token'ı header'a ekler.
+    </p>
+
+    <h3>Loading/error state yönetimi</h3>
+    <ul>
+      <li>Login/register submit sırasında <code>loading</code> true olur, buton disabled olur ve metin değişir.</li>
+      <li>Dashboard ilk açılışta <code>loading</code> ile yükleniyor mesajı gösterir.</li>
+      <li>Task create/update sırasında <code>formLoading</code> form submit butonunu disabled yapar.</li>
+      <li>Hatalar toast mesajlarıyla kullanıcıya bildirilir.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>9. Hata Yönetimi ve Loglama</h2>
+    <h3>Frontend hata yönetimi</h3>
+    <ul>
+      <li>Login/register hatalarında API response mesajı varsa gösterilir.</li>
+      <li>Dashboard task yükleme, ekleme, güncelleme, silme ve tamamlama hataları için Türkçe toast mesajları vardır.</li>
+      <li>Axios response interceptor 401 aldığında <code>token</code> ve <code>user</code> localStorage değerlerini siler ve login'e yönlendirir.</li>
+    </ul>
+
+    <h3>Backend hata middleware'i</h3>
+    <p>
+      <code>backend/src/middleware/errorHandler.js</code>, yakalanan hataları console'a basar ve JSON response döndürür.
+      <code>NODE_ENV=development</code> ise stack trace response'a eklenir.
+    </p>
+
+    <h3>Console/server log mantığı</h3>
+    <ul>
+      <li>MongoDB bağlantısı başarılı olursa host bilgisi loglanır.</li>
+      <li>Server başlarsa port URL'i loglanır.</li>
+      <li>Error middleware <code>err.stack</code> değerini console'a yazar.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>10. Kurulum ve Çalıştırma Talimatları</h2>
+    <h3>Gereken bağımlılıklar</h3>
+    <ul>
+      <li>Node.js 20+ önerilir. Geliştirme ortamında Node 22 ile build alınmıştır.</li>
+      <li>npm</li>
+      <li>MongoDB Atlas veya lokal MongoDB bağlantısı</li>
+    </ul>
+
+    <h3>Kurulum komutları</h3>
+    <pre><code>git clone &lt;repo-url&gt;
+cd todo-app
+
+cd backend
+npm install
+
+cd ../frontend
+npm install</code></pre>
+
+    <h3>Development çalıştırma</h3>
+    <pre><code># Terminal 1
+cd backend
+npm run dev
+
+# Terminal 2
+cd frontend
+npm run dev</code></pre>
+
+    <h3>Production build alma</h3>
+    <pre><code>cd frontend
+npm run build
+npm run start
+
+cd ../backend
+npm run start</code></pre>
+    <div class="note warn">
+      <strong>Not:</strong> Next build sırasında workspace root/çoklu lockfile uyarısı görülebilir.
+      Bu, proje üst dizininde ek bir <code>package-lock.json</code> algılanmasından kaynaklanır. Build başarıyla tamamlanabilir.
+      Uyarıyı susturmak için <code>next.config.mjs</code> içinde Turbopack root ayarı yapılabilir veya gereksiz lockfile kaldırılabilir.
+    </div>
+
+    <h3>Veritabanı bağlantısı kurma</h3>
+    <ol>
+      <li>MongoDB Atlas'ta cluster ve database user oluşturun.</li>
+      <li>IP allowlist ayarını yapın.</li>
+      <li><code>backend/.env</code> içine <code>MONGODB_URI</code> ekleyin.</li>
+      <li>URI içinde database adını belirtin: <code>...mongodb.net/tickit?appName=...</code>.</li>
+      <li>Backend'i yeniden başlatın.</li>
+    </ol>
+
+    <h3>Test kullanıcı bilgileri</h3>
+    <p>
+      Projede seed veya hazır test kullanıcısı bulunmuyor. Test için <code>/register</code> sayfasından yeni hesap açılmalıdır.
+    </p>
+
+    <h3>Doğrulama komutları</h3>
+    <pre><code>cd frontend
+npm run lint
+npm run build
+
+cd ../backend
+node -c src/models/Task.js</code></pre>
+    <p>
+      Backend <code>npm test</code> script'i şu an gerçek test çalıştırmaz; placeholder olarak hata döndürür.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>11. Eksikler ve Geliştirme Önerileri</h2>
+    <h3>Projede eksik kalan yerler</h3>
+    <ul>
+      <li>Backend testleri yok.</li>
+      <li>Frontend e2e veya component testleri yok.</li>
+      <li>Task kategori/tag alanı yok.</li>
+      <li>Server-side pagination yok; task listesi tamamen client'a gelir.</li>
+      <li>Görev arama özelliği yok.</li>
+      <li>Görev sıralama ve overdue durumu yok.</li>
+      <li>Hazır seed veya demo user yok.</li>
+      <li><code>backend/.env.example</code> dosyası içerik olarak doldurulmalı.</li>
+    </ul>
+
+    <h3>Güvenlik iyileştirmeleri</h3>
+    <ul>
+      <li>Request validation library eklenmeli.</li>
+      <li>NoSQL sanitize middleware eklenmeli.</li>
+      <li>JWT localStorage yerine HttpOnly cookie + CSRF koruması değerlendirilmeli.</li>
+      <li>Auth endpointleri için daha sıkı rate limit uygulanmalı.</li>
+      <li>Password policy güçlendirilmeli.</li>
+      <li>Production loglama için structured logger kullanılmalı.</li>
+    </ul>
+
+    <h3>Performans önerileri</h3>
+    <ul>
+      <li><code>tasks</code> collection için <code>{ user: 1, createdAt: -1 }</code> index'i eklenmeli.</li>
+      <li>Görev listesi büyürse pagination veya infinite scroll eklenmeli.</li>
+      <li>Task update sonrası tüm listeyi yeniden almak yerine mevcut state güncellemesi şimdiki gibi korunabilir; ancak concurrency durumları için server snapshot düşünülebilir.</li>
+      <li>Next config içinde workspace root uyarısı temizlenmeli.</li>
+    </ul>
+
+    <h3>Kod kalitesi önerileri</h3>
+    <ul>
+      <li>API response tipleri ve form validasyonları için ortak schema tanımlanmalı.</li>
+      <li>TaskForm içindeki renk/önem sabitleri ayrı config dosyasına alınabilir.</li>
+      <li>Auth state için küçük bir context/provider eklenebilir.</li>
+      <li>Backend controller'larda allowlist update payload kullanılmalı; request body doğrudan modele verilmemeli.</li>
+      <li>Hata mesajları ve toast metinleri merkezi constants dosyasında toplanabilir.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
