@@ -1,5 +1,12 @@
 const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
-const EXEMPT_PATHS = ['/auth/login', '/auth/register', '/api/auth/login', '/api/auth/register'];
+const EXEMPT_PATHS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/logout',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/logout',
+];
 
 const csrfProtection = (req, res, next) => {
   if (SAFE_METHODS.includes(req.method)) return next();

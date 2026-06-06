@@ -22,6 +22,7 @@ describe('Auth API', () => {
 
       expect(res.body.success).toBe(true);
       expect(res.body).not.toHaveProperty('token');
+      expect(res.body.csrfToken).toEqual(expect.any(String));
       expect(getCookieValue(res, 'token')).toEqual(expect.any(String));
       expect(getCookieValue(res, 'csrfToken')).toEqual(expect.any(String));
       expect(res.body.user).toMatchObject({
@@ -78,6 +79,7 @@ describe('Auth API', () => {
 
       expect(res.body.success).toBe(true);
       expect(res.body).not.toHaveProperty('token');
+      expect(res.body.csrfToken).toEqual(expect.any(String));
       expect(getCookieValue(res, 'token')).toEqual(expect.any(String));
       expect(getCookieValue(res, 'csrfToken')).toEqual(expect.any(String));
       expect(res.body.user.email).toBe(validUser.email);
@@ -133,12 +135,10 @@ describe('Auth API', () => {
 
     it('logs out and clears auth cookies', async () => {
       const agent = request.agent(app);
-      const register = await agent.post('/api/auth/register').send(validUser).expect(201);
-      const csrfToken = getCookieValue(register, 'csrfToken');
+      await agent.post('/api/auth/register').send(validUser).expect(201);
 
       const res = await agent
         .post('/api/auth/logout')
-        .set('X-CSRF-Token', csrfToken)
         .expect(200);
 
       expect(res.body).toMatchObject({ success: true, message: 'Çıkış yapıldı' });

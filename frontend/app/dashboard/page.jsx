@@ -9,7 +9,7 @@ import {
   Pagination,
 } from '@mui/material';
 import { Add, Close, Logout, AccountCircle, Search } from '@mui/icons-material';
-import api from '@/lib/api';
+import api, { clearCsrfToken } from '@/lib/api';
 import TaskList from '@/components/tasks/TaskList';
 import TaskForm from '@/components/tasks/TaskForm';
 import toast from 'react-hot-toast';
@@ -132,6 +132,7 @@ export default function DashboardPage() {
     } catch {
       toast.error('Çıkış sırasında bir sorun oluştu');
     } finally {
+      clearCsrfToken();
       router.push('/login');
     }
   };

@@ -17,10 +17,15 @@ const parseDuration = (value = '7d') => {
 };
 
 const isProduction = () => process.env.NODE_ENV === 'production';
+const shouldPartitionCookies = () =>
+  process.env.COOKIE_PARTITIONED
+    ? process.env.COOKIE_PARTITIONED === 'true'
+    : isProduction();
 
 const cookieOptions = (overrides = {}) => ({
   secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : isProduction(),
   sameSite: process.env.COOKIE_SAMESITE || (isProduction() ? 'none' : 'lax'),
+  partitioned: shouldPartitionCookies(),
   path: '/',
   ...overrides,
 });
@@ -38,6 +43,8 @@ const setAuthCookies = (res, token) => {
     httpOnly: false,
     maxAge,
   }));
+
+  return csrfToken;
 };
 
 const clearAuthCookies = (res) => {

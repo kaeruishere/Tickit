@@ -7,7 +7,7 @@ import {
   Typography, InputAdornment, IconButton, Divider,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import api from '@/lib/api';
+import api, { storeCsrfToken } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -25,6 +25,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', form);
+      storeCsrfToken(data.csrfToken);
       toast.success(`Hoş geldin, ${data.user.username}!`);
       router.push('/dashboard');
     } catch (err) {

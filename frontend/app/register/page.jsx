@@ -7,7 +7,7 @@ import {
   Typography, InputAdornment, IconButton, Divider,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import api from '@/lib/api';
+import api, { storeCsrfToken } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -24,7 +24,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/register', form);
+      const { data } = await api.post('/auth/register', form);
+      storeCsrfToken(data.csrfToken);
       toast.success('Hesap oluşturuldu!');
       router.push('/dashboard');
     } catch (err) {
