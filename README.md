@@ -1,19 +1,19 @@
 # Tickit
 
-Tickit is a full-stack todo application with user authentication, task CRUD, priority, due date/time, color accents, search, sorting, filtering, overdue indicators, and a security-focused cookie authentication flow.
+Tickit, kullanıcı kimlik doğrulaması, görev CRUD, öncelik, son tarih/saat, renk vurguları, arama, sıralama, filtreleme, gecikme göstergesi ve güvenliğe odaklı çerez tabanlı kimlik doğrulama akışı içeren tam yığın bir yapılacaklar uygulamasıdır.
 
-## Stack
+## Yığın
 
-| Layer | Technology |
+| Katman | Teknoloji |
 | --- | --- |
 | Frontend | Next.js 16, React 19, MUI 9 |
 | Backend | Node.js, Express 5 |
-| Database | MongoDB, Mongoose |
-| Auth | JWT in HttpOnly cookies |
-| Security | Helmet, CORS, rate limiting, CSRF protection, request validation, NoSQL sanitization, bcrypt |
-| Tests | Jest, Supertest, mongodb-memory-server |
+| Veritabanı | MongoDB, Mongoose |
+| Kimlik Doğrulama | HttpOnly çerezlerde JWT |
+| Güvenlik | Helmet, CORS, hız sınırlama, CSRF koruması, istek doğrulama, NoSQL temizleme, bcrypt |
+| Testler | Jest, Supertest, mongodb-memory-server |
 
-## Project Structure
+## Proje Yapısı
 
 ```text
 todo-app/
@@ -36,32 +36,29 @@ todo-app/
     lib/
     public/favicon_io/
     .env.local.example
-  doc/
-    rapor.html
-    implementationplan.html
 ```
 
-## Security Model
+## Güvenlik Modeli
 
-Tickit uses cookie-based JWT authentication:
+Tickit, çerez tabanlı JWT kimlik doğrulaması kullanır:
 
-- The backend sets the JWT in a `token` cookie.
-- The `token` cookie is `HttpOnly`, so frontend JavaScript cannot read it.
-- The backend also sets a readable `csrfToken` cookie.
-- Unsafe requests such as `POST`, `PUT`, and `DELETE` must send `X-CSRF-Token`.
-- The frontend Axios client reads `csrfToken` and sends it automatically.
-- Axios uses `withCredentials: true` so browser cookies are included in API requests.
+- Backend, JWT'yi `token` çerezine yazar.
+- `token` çerezi `HttpOnly` olduğu için frontend JavaScript tarafından okunamaz.
+- Backend ayrıca okunabilir bir `csrfToken` çerezi ayarlar.
+- `POST`, `PUT` ve `DELETE` gibi güvenli olmayan istekler `X-CSRF-Token` göndermelidir.
+- Frontend Axios istemcisi `csrfToken`'ı okur ve otomatik olarak gönderir.
+- Axios, tarayıcı çerezlerinin API isteklerine dahil edilmesi için `withCredentials: true` kullanır.
 
-Relevant files:
+İlgili dosyalar:
 
 - `backend/src/utils/authCookies.js`
 - `backend/src/middleware/csrf.js`
 - `backend/src/middleware/auth.js`
 - `frontend/lib/api.js`
 
-## Environment Variables
+## Ortam Değişkenleri
 
-Create `backend/.env` from `backend/.env.example`:
+`backend/.env` dosyasını `backend/.env.example`'den oluşturun:
 
 ```env
 PORT=5000
@@ -74,13 +71,13 @@ COOKIE_SECURE=false
 COOKIE_SAMESITE=lax
 ```
 
-Create `frontend/.env.local` from `frontend/.env.local.example`:
+`frontend/.env.local` dosyasını `frontend/.env.local.example`'den oluşturun:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
-For production with separate frontend/backend domains, use:
+Ayrı frontend/backend alan adlarıyla üretim için kullanın:
 
 ```env
 NODE_ENV=production
@@ -89,47 +86,47 @@ COOKIE_SECURE=true
 COOKIE_SAMESITE=none
 ```
 
-If frontend and backend are served under the same site, `COOKIE_SAMESITE=lax` can be used.
+Frontend ve backend aynı site altında sunuluyorsa `COOKIE_SAMESITE=lax` kullanılabilir.
 
-## Local Development
+## Yerel Geliştirme
 
-Install backend dependencies:
+Backend bağımlılıklarını yükleyin:
 
 ```bash
 cd backend
 npm install
 ```
 
-Install frontend dependencies:
+Frontend bağımlılıklarını yükleyin:
 
 ```bash
 cd frontend
 npm install
 ```
 
-Run the backend:
+Backend'i çalıştırın:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Run the frontend:
+Frontend'i çalıştırın:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open:
+Açın:
 
 ```text
 http://localhost:3000
 ```
 
-## Test and Verification
+## Test ve Doğrulama
 
-Backend tests:
+Backend testleri:
 
 ```bash
 cd backend
@@ -143,77 +140,37 @@ cd frontend
 npm run lint
 ```
 
-Frontend production build:
+Frontend üretim yapısı:
 
 ```bash
 cd frontend
 npm run build
 ```
 
-## API Summary
+## API Özeti
 
-| Method | Endpoint | Auth | Description |
+| Yöntem | Uç Nokta | Kimlik Doğrulama | Açıklama |
 | --- | --- | --- | --- |
-| GET | `/api/health` | No | Health check |
-| POST | `/api/auth/register` | No | Register user and set auth cookies |
-| POST | `/api/auth/login` | No | Login user and set auth cookies |
-| POST | `/api/auth/logout` | Yes + CSRF | Clear auth cookies |
-| GET | `/api/auth/me` | Yes | Return current user |
-| GET | `/api/tasks` | Yes | List current user's tasks |
-| POST | `/api/tasks` | Yes + CSRF | Create task |
-| PUT | `/api/tasks/:id` | Yes + CSRF | Update task |
-| DELETE | `/api/tasks/:id` | Yes + CSRF | Delete task |
+| GET | `/api/health` | Hayır | Sağlık kontrolü |
+| POST | `/api/auth/register` | Hayır | Kullanıcı kaydı ve kimlik doğrulama çerezleri ayarlama |
+| POST | `/api/auth/login` | Hayır | Kullanıcı girişi ve kimlik doğrulama çerezleri ayarlama |
+| POST | `/api/auth/logout` | Evet + CSRF | Kimlik doğrulama çerezlerini temizleme |
+| GET | `/api/auth/me` | Evet | Mevcut kullanıcıyı döndürme |
+| GET | `/api/tasks` | Evet | Mevcut kullanıcının görevlerini listeleme |
+| POST | `/api/tasks` | Evet + CSRF | Görev oluşturma |
+| PUT | `/api/tasks/:id` | Evet + CSRF | Görevi güncelleme |
+| DELETE | `/api/tasks/:id` | Evet + CSRF | Görevi silme |
 
-## Features
+## Özellikler
 
-- Register and login
-- HttpOnly cookie auth
-- CSRF protection
-- Task create, edit, delete, complete
-- Quick task creation with optional details
-- Description, priority, due date/time, color
-- Overdue task indicator
-- Search by title or description
-- Filter by all, active, completed
-- Sort by newest, oldest, due date, priority
-- User greeting and dashboard stats
-
-## Production Deployment
-
-Recommended simple deployment:
-
-- Frontend: Vercel or Netlify
-- Backend: Render, Railway, Fly.io, or VPS
-- Database: MongoDB Atlas
-
-Backend production checklist:
-
-- Use a real database name in `MONGODB_URI`, for example `/tickit`.
-- Use a long random `JWT_SECRET`.
-- Set `NODE_ENV=production`.
-- Set `CLIENT_URL` to the exact frontend origin.
-- Set `COOKIE_SECURE=true`.
-- Use `COOKIE_SAMESITE=none` for cross-site frontend/backend hosting.
-- Restrict MongoDB Atlas network access.
-- Use a least-privilege MongoDB user.
-
-Frontend production checklist:
-
-- Set `NEXT_PUBLIC_API_URL` to the deployed backend API URL.
-- Ensure the backend supports credentials and the exact frontend origin.
-- Test login/register/logout and task mutations after deployment.
-
-## Documentation
-
-Detailed reports are available in:
-
-- `doc/rapor.html`
-- `doc/implementationplan.html`
-
-## Known Follow-ups
-
-- Server-side pagination for large task lists
-- Category/tag support
-- Production structured logging
-- E2E tests with Playwright
-- Optional migration to same-domain reverse proxy deployment for simpler cookie behavior
+- Kayıt olma ve giriş yapma
+- HttpOnly çerez kimlik doğrulaması
+- CSRF koruması
+- Görev oluşturma, düzenleme, silme, tamamlama
+- İsteğe bağlı detaylarla hızlı görev oluşturma
+- Açıklama, öncelik, son tarih/saat, renk
+- Gecikmiş görev göstergesi
+- Başlığa veya açıklamaya göre arama
+- Tümünü, aktifleri, tamamlananları filtreleme
+- En yeni, en eski, son tarihe, önceliğe göre sıralama
+- Kullanıcı selamlaması ve pano istatistikleri
