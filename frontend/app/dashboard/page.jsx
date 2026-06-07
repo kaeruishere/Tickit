@@ -6,7 +6,7 @@ import {
   DialogContent, IconButton, ToggleButtonGroup,
   ToggleButton, Card, CardContent, AppBar, Toolbar,
   Avatar, Menu, MenuItem, Divider, TextField, InputAdornment,
-  Pagination,
+  Pagination, Skeleton,
 } from '@mui/material';
 import { Add, Close, Logout, AccountCircle, Search } from '@mui/icons-material';
 import api, { clearCsrfToken } from '@/lib/api';
@@ -15,6 +15,33 @@ import TaskForm from '@/components/tasks/TaskForm';
 import toast from 'react-hot-toast';
 
 const priorityRank = { high: 3, medium: 2, low: 1 };
+
+const TaskListSkeleton = () => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    {Array.from({ length: 5 }).map((_, index) => (
+      <Card key={index} elevation={0}>
+        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+            <Skeleton variant="circular" width={34} height={34} sx={{ mt: 0.25, flexShrink: 0 }} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Skeleton variant="text" width={index % 2 ? '62%' : '78%'} height={28} />
+              <Skeleton variant="text" width={index % 2 ? '84%' : '56%'} height={22} />
+              <Box sx={{ display: 'flex', gap: 1, mt: 1.25 }}>
+                <Skeleton variant="rounded" width={78} height={26} sx={{ borderRadius: 13 }} />
+                <Skeleton variant="rounded" width={94} height={26} sx={{ borderRadius: 13 }} />
+                {index < 3 && <Skeleton variant="rounded" width={82} height={26} sx={{ borderRadius: 13 }} />}
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
+              <Skeleton variant="circular" width={30} height={30} />
+              <Skeleton variant="circular" width={30} height={30} />
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+    ))}
+  </Box>
+);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -176,7 +203,7 @@ export default function DashboardPage() {
           </Box>
           <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
             <Avatar sx={{ bgcolor: '#6750A4', width: 36, height: 36, fontSize: 16 }}>
-              {user?.username?.[0]?.toUpperCase()}
+              {initialLoading ? '' : user?.username?.[0]?.toUpperCase()}
             </Avatar>
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}
@@ -208,12 +235,21 @@ export default function DashboardPage() {
             <Typography variant="overline" sx={{ color: '#6750A4', fontWeight: 700, letterSpacing: 0 }}>
               Tickit Dashboard
             </Typography>
-            <Typography variant="h4" sx={{ color: '#1C1B1F', fontWeight: 700, lineHeight: 1.15 }}>
-              {greeting}, {displayName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
-              {focusText}
-            </Typography>
+            {initialLoading ? (
+              <>
+                <Skeleton variant="text" width={280} height={44} sx={{ maxWidth: '100%' }} />
+                <Skeleton variant="text" width={220} height={24} sx={{ mt: 0.25, maxWidth: '85%' }} />
+              </>
+            ) : (
+              <>
+                <Typography variant="h4" sx={{ color: '#1C1B1F', fontWeight: 700, lineHeight: 1.15 }}>
+                  {greeting}, {displayName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                  {focusText}
+                </Typography>
+              </>
+            )}
           </Box>
           <Box
             sx={{
@@ -229,7 +265,7 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap',
             }}
           >
-            {todayLabel}
+            {initialLoading ? <Skeleton variant="text" width={112} height={20} /> : todayLabel}
           </Box>
         </Box>
 
@@ -237,8 +273,17 @@ export default function DashboardPage() {
           {stats.map((s) => (
             <Card key={s.label} elevation={0}>
               <CardContent sx={{ textAlign: 'center', py: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Typography variant="h4" sx={{ color: s.color, fontWeight: 600 }}>{s.value}</Typography>
-                <Typography variant="caption" color="text.secondary">{s.label}</Typography>
+                {initialLoading ? (
+                  <>
+                    <Skeleton variant="text" width={46} height={42} sx={{ mx: 'auto' }} />
+                    <Skeleton variant="text" width={72} height={18} sx={{ mx: 'auto' }} />
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="h4" sx={{ color: s.color, fontWeight: 600 }}>{s.value}</Typography>
+                    <Typography variant="caption" color="text.secondary">{s.label}</Typography>
+                  </>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -333,9 +378,7 @@ export default function DashboardPage() {
         </Box>
 
         {initialLoading ? (
-          <Box sx={{ textAlign: 'center', py: 10, color: 'text.disabled' }}>
-            <Typography>Yükleniyor...</Typography>
-          </Box>
+          <TaskListSkeleton />
         ) : (
           <>
             <TaskList tasks={sortedTasks} onToggle={handleToggle} onDelete={handleDelete} onEdit={setEditTask} now={now} isSearching={Boolean(searchTerm)} />
