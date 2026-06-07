@@ -78,7 +78,7 @@ export default function RegisterPage() {
           <CardContent sx={{ p: 4 }}>
             <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <TextField
-                label="Kullanıcı Adı"
+                label="Ad Soyad"
                 fullWidth
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
